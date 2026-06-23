@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: payment-api
-          image: pedro/payment-api:latest
+          image: phsvicero/payment-api:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080
