@@ -1,0 +1,22 @@
+@PaymentAPI_HostAddress = http://localhost:5059
+
+GET {{PaymentAPI_HostAddress}}/health
+Accept: application/json
+
+###
+
+POST {{PaymentAPI_HostAddress}}/payments/process
+Content-Type: application/json
+
+{
+  "userId": 1,
+  "gameId": 10,
+  "price": 59.90,
+  "type": "CreditCard",
+  "installments": 1
+}
+
+###
+
+GET {{PaymentAPI_HostAddress}}/payments?userId=1
+Accept: application/json
