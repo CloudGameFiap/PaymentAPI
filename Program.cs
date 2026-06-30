@@ -198,9 +198,13 @@ try
         }
     }
 }
-catch (Exception ex)
+catch (Exception ex) when (ex.GetType().Name != "HostAbortedException")
 {
     Log.Fatal(ex, "Application failed to start");
+}
+catch (Exception)
+{
+    throw;
 }
 finally
 {
