@@ -42,27 +42,27 @@ try
         bus.SetKebabCaseEndpointNameFormatter();
         bus.AddConsumer<OrderPlacedConsumer>();
 
-    bus.UsingRabbitMq((context, cfg) =>
-    {
-        var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
-        var host = rabbitMqSection["Host"]!;
-        var username = rabbitMqSection["Username"]!;
-        var password = rabbitMqSection["Password"]!;
-
-        cfg.Host(host, "/", h =>
+        bus.UsingRabbitMq((context, cfg) =>
         {
-            h.Username(username);
-            h.Password(password);
+            var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+            var host = rabbitMqSection["Host"]!;
+            var username = rabbitMqSection["Username"]!;
+            var password = rabbitMqSection["Password"]!;
+
+            cfg.Host(host, "/", h =>
+            {
+                h.Username(username);
+                h.Password(password);
+            });
+
+            cfg.ConfigureEndpoints(context);
+
+            //cfg.ReceiveEndpoint(rabbitMqOptions.OrderPlacedQueue, endpoint =>
+            //{
+            //    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
+            //});
         });
-
-        cfg.ConfigureEndpoints(context);
-
-        //cfg.ReceiveEndpoint(rabbitMqOptions.OrderPlacedQueue, endpoint =>
-        //{
-        //    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
-        //});
     });
-});
 
     var app = builder.Build();
 
