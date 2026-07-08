@@ -1,50 +1,68 @@
 services:
-  payment-api:
+  cloudgamepaymentapi:
+    image: ${DOCKER_REGISTRY-}cloudgamepaymentapi
     build:
       context: .
-      dockerfile: Dockerfile
-    container_name: cloudgame-payment-api
+      dockerfile: ./src/Dockerfile
+    ports:
+      - '57398:8080'
+      - '57399:8081'
+    restart: unless-stopped
     depends_on:
+      sqlserver:
+        condition: service_healthy
       rabbitmq:
         condition: service_healthy
-      sqlserver:
-        condition: service_started
-    environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      ASPNETCORE_URLS: http://+:8080
-      ConnectionStrings__CloudGameDb: Server=sqlserver,1433;Database=PaymentDb;User Id=phSvicero;Password=paymentCG;TrustServerCertificate=True
-      RabbitMq__Host: rabbitmq
-      RabbitMq__VirtualHost: /
-      RabbitMq__Username: guest
-      RabbitMq__Password: guest
-      RabbitMq__OrderPlacedQueue: payments.order-placed
-      PaymentProcessing__ApprovalPercentage: 80
-      PaymentProcessing__DefaultPaymentType: CreditCard
-    ports:
-      - "5059:8080"
-
-  rabbitmq:
-    image: rabbitmq:3-management
-    container_name: cloudgame-rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    healthcheck:
-      test: ["CMD", "rabbitmq-diagnostics", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+    networks:
+      - cloudgame-network
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: cloudgame-sqlserver
+    hostname: 'sqlserver'
     environment:
-      ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: Your_password123
-    ports:
-      - "1433:1433"
+      ACCEPT_EULA: 'Y'
+      MSSQL_SA_PASSWORD: "CloudGame#2026"
     volumes:
-      - sqlserver-data:/var/opt/mssql
+      - sql_data:/var/opt/mssql
+    restart: unless-stopped
+    ports:
+      - '1434:1433'
+    expose:
+      - 1433
+    healthcheck:
+      test: ['CMD-SHELL', '/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "$$MSSQL_SA_PASSWORD" -C -Q "SELECT 1" -b -o /dev/null']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - cloudgame-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    hostname: 'rabbitmq'
+    container_name: rabbitmq
+    restart: unless-stopped
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - cloudgame-network
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
 
 volumes:
-  sqlserver-data:
+  sql_data:
+  rabbitmq_data:
+networks:
+  cloudgame-network:
+    driver: bridge
