@@ -35,20 +35,23 @@ builder.Services.AddMassTransit(bus =>
 
     bus.UsingRabbitMq((context, cfg) =>
     {
-        var rabbitMqOptions = builder.Configuration
-            .GetSection(RabbitMqOptions.SectionName)
-            .Get<RabbitMqOptions>() ?? new RabbitMqOptions();
+        var rabbitMqSection = builder.Configuration.GetRequiredSection("RabbitMQ")!;
+        var host = rabbitMqSection["Host"]!;
+        var username = rabbitMqSection["Username"]!;
+        var password = rabbitMqSection["Password"]!;
 
-        cfg.Host(rabbitMqOptions.Host, rabbitMqOptions.VirtualHost, host =>
+        cfg.Host(host, "/", h =>
         {
-            host.Username(rabbitMqOptions.Username);
-            host.Password(rabbitMqOptions.Password);
+            h.Username(username);
+            h.Password(password);
         });
 
-        cfg.ReceiveEndpoint(rabbitMqOptions.OrderPlacedQueue, endpoint =>
-        {
-            endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
-        });
+        cfg.ConfigureEndpoints(context);
+
+        //cfg.ReceiveEndpoint(rabbitMqOptions.OrderPlacedQueue, endpoint =>
+        //{
+        //    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
+        //});
     });
 });
 
