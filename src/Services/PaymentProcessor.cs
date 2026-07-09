@@ -19,14 +19,14 @@ public sealed class PaymentProcessor(
         CancellationToken cancellationToken)
     {
         var orderId = request.OrderId ?? Guid.NewGuid();
-        var existingPayment = await dbContext.Payments
-            .AsNoTracking()
-            .FirstOrDefaultAsync(payment => payment.OrderId == orderId, cancellationToken);
+        //var existingPayment = await dbContext.Payments
+        //    .AsNoTracking()
+        //    .FirstOrDefaultAsync(payment => payment.OrderId == orderId, cancellationToken);
 
-        if (existingPayment is not null)
-        {
-            return BuildResult(existingPayment);
-        }
+        //if (existingPayment is not null)
+        //{
+        //    return BuildResult(existingPayment);
+        //}
 
         var status = Random.Shared.Next(100) < _options.ApprovalPercentage
             ? PaymentStatus.Approved
@@ -41,8 +41,8 @@ public sealed class PaymentProcessor(
             status,
             request.Installments);
 
-        dbContext.Payments.Add(payment);
-        await dbContext.SaveChangesAsync(cancellationToken);
+        //dbContext.Payments.Add(payment);
+        //await dbContext.SaveChangesAsync(cancellationToken);
 
         return BuildResult(payment);
     }

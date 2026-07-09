@@ -18,6 +18,12 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
+    builder.Host.UseSerilog((context, services, configuration) => configuration
+    .ReadFrom.Configuration(context.Configuration)
+    .ReadFrom.Services(services)
+    .Enrich.FromLogContext()
+    .WriteTo.Console());
+
     builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
     builder.Services.Configure<PaymentProcessingOptions>(builder.Configuration.GetSection(PaymentProcessingOptions.SectionName));
 
@@ -39,7 +45,7 @@ try
 
     builder.Services.AddMassTransit(bus =>
     {
-        bus.SetKebabCaseEndpointNameFormatter();
+        //bus.SetKebabCaseEndpointNameFormatter();
         bus.AddConsumer<OrderPlacedConsumer>();
 
         bus.UsingRabbitMq((context, cfg) =>
@@ -68,11 +74,10 @@ try
 
     app.UseSerilogRequestLogging();
 
-    if (app.Environment.IsDevelopment())
-    {
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    }
+
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    
 
     app.MapGet("/health/live", () => Results.Ok(new { Status = "Alive" }));
 
