@@ -1,37 +1,47 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: payment-api
+  name: cloudgamepaymentapi
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: payment-api
+      app: cloudgamepaymentapi
   template:
     metadata:
       labels:
-        app: payment-api
+        app: cloudgamepaymentapi
     spec:
       containers:
-        - name: payment-api
+        - name: cloudgamepaymentapi
           image: phsvicero/payment-api:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - name: http
+              containerPort: 8080
           envFrom:
             - configMapRef:
                 name: payment-api-config
             - secretRef:
                 name: payment-api-secret
+          startupProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /health/ready
               port: 8080
-            initialDelaySeconds: 10
+            initialDelaySeconds: 15
             periodSeconds: 10
+            failureThreshold: 6
           livenessProbe:
             httpGet:
               path: /health/live
               port: 8080
-            initialDelaySeconds: 20
+            initialDelaySeconds: 30
             periodSeconds: 20
