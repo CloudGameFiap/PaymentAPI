@@ -2,8 +2,8 @@ services:
   cloudgamepaymentapi:
     image: ${DOCKER_REGISTRY-}cloudgamepaymentapi
     build:
-      context: .
-      dockerfile: ./src/Dockerfile
+      context: ./src
+      dockerfile: Dockerfile
     ports:
       - '57398:8080'
       - '57399:8081'
