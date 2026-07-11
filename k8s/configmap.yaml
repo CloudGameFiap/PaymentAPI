@@ -3,10 +3,9 @@ kind: ConfigMap
 metadata:
   name: payment-api-config
 data:
-  ASPNETCORE_URLS: http://+:8080
+  ASPNETCORE_HTTP_PORTS: "8080"
   ASPNETCORE_ENVIRONMENT: Production
-  RabbitMq__Host: rabbitmq
-  RabbitMq__VirtualHost: /
-  RabbitMq__OrderPlacedQueue: payments.order-placed
+  RabbitMQ__Host: rabbitmq
+  RabbitMQ__Port: "5672"
   PaymentProcessing__ApprovalPercentage: "80"
   PaymentProcessing__DefaultPaymentType: CreditCard
