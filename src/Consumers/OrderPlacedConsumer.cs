@@ -12,6 +12,7 @@ public sealed class OrderPlacedConsumer(
 {
     public async Task Consume(ConsumeContext<OrderPlacedEvent> context)
     {
+        logger.LogInformation("OrderPlacedEvent received.");
         var message = context.Message;
 
         logger.LogInformation(
@@ -30,8 +31,11 @@ public sealed class OrderPlacedConsumer(
         await publishEndpoint.Publish(result.Event, context.CancellationToken);
 
         logger.LogInformation(
-            "Payment {PaymentId} processed with status {Status}",
-            result.Payment.Id,
+            "Payment for user {UserId} and game {GameId} processed with status {Status}",
+            message.UserId,
+            message.GameId,
             result.Payment.Status);
+
+        logger.LogInformation("OrderPlacedEvent processed.");
     }
 }
