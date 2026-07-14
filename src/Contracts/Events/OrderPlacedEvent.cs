@@ -1,10 +1,13 @@
-namespace CloudGame.Contracts.Events;
+using System.Text.Json.Serialization;
 
-public sealed record OrderPlacedEvent
+namespace CloudGameCatalog.Domain.Commom.Events;
+
+[method: JsonConstructor]
+public class OrderPlacedEvent(int userId, int gameId, decimal price)
 {
-    public Guid OrderId { get; init; } = Guid.NewGuid();
-    public int UserId { get; init; }
-    public int GameId { get; init; }
-    public decimal Price { get; init; }
-    public DateTime PlacedAt { get; init; } = DateTime.UtcNow;
+    public int UserId { get; private set; } = userId;
+
+    public int GameId { get; private set; } = gameId;
+
+    public decimal Price { get; private set; } = price;
 }

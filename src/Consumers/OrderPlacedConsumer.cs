@@ -1,4 +1,4 @@
-using CloudGame.Contracts.Events;
+using CloudGameCatalog.Domain.Commom.Events;
 using MassTransit;
 using PaymentAPI.Dtos;
 using PaymentAPI.Services;
@@ -15,8 +15,7 @@ public sealed class OrderPlacedConsumer(
         var message = context.Message;
 
         logger.LogInformation(
-            "Processing order {OrderId} payment for user {UserId} and game {GameId}",
-            message.OrderId,
+            "Processing payment for user {UserId} and game {GameId}",            
             message.UserId,
             message.GameId);
 
@@ -25,8 +24,7 @@ public sealed class OrderPlacedConsumer(
             message.GameId,
             message.Price,
             null,
-            1,
-            message.OrderId);
+            1);
 
         var result = await processor.ProcessAsync(request, context.CancellationToken);
         await publishEndpoint.Publish(result.Event, context.CancellationToken);

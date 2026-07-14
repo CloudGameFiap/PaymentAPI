@@ -1,12 +1,17 @@
-namespace CloudGame.Contracts.Events;
+namespace CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
 
-public record PaymentProcessedEvent
+public class PaymentProcessedEvent
 {
-    public Guid PaymentId { get; set; }
-    public Guid OrderId { get; set; }
-    public int UserId { get; set; }
     public int GameId { get; set; }
-    public decimal Price { get; set; }
-    public string Status { get; set; } = string.Empty;
-    public DateTime ProcessedAt { get; set; }
+
+    public int UserId { get; set; }
+
+    public PaymentProcessStatus Status { get; set; }
+}
+
+public enum PaymentProcessStatus
+{
+    WaitingPayment = 1,
+    PaymentApproved = 2,
+    PaymentRejected = 3,
 }

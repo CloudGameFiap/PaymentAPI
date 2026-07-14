@@ -24,8 +24,8 @@ try
     .Enrich.FromLogContext()
     .WriteTo.Console());
 
-    builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
-    builder.Services.Configure<PaymentProcessingOptions>(builder.Configuration.GetSection(PaymentProcessingOptions.SectionName));
+    //builder.Services.Configure<RabbitMqOptions>(builder.Configuration.GetSection(RabbitMqOptions.SectionName));
+    //builder.Services.Configure<PaymentProcessingOptions>(builder.Configuration.GetSection(PaymentProcessingOptions.SectionName));
 
     builder.Services.ConfigureHttpJsonOptions(options =>
     {
@@ -44,8 +44,7 @@ try
     builder.Services.AddScoped<PaymentProcessor>();
 
     builder.Services.AddMassTransit(bus =>
-    {
-        //bus.SetKebabCaseEndpointNameFormatter();
+    {        
         bus.AddConsumer<OrderPlacedConsumer>();
 
         bus.UsingRabbitMq((context, cfg) =>
@@ -61,12 +60,7 @@ try
                 h.Password(password);
             });
 
-            cfg.ConfigureEndpoints(context);
-
-            //cfg.ReceiveEndpoint(rabbitMqOptions.OrderPlacedQueue, endpoint =>
-            //{
-            //    endpoint.ConfigureConsumer<OrderPlacedConsumer>(context);
-            //});
+            cfg.ConfigureEndpoints(context);            
         });
     });
 
@@ -102,8 +96,7 @@ try
 
     app.MapPost("/payments/process", async (
         ProcessPaymentRequest request,
-        PaymentProcessor processor,
-        IPublishEndpoint publishEndpoint,
+        PaymentProcessor processor,        
         CancellationToken cancellationToken) =>
     {
         if (request.UserId <= 0 || request.GameId <= 0 || request.Price <= 0 || request.Installments <= 0)
@@ -114,8 +107,7 @@ try
             });
         }
 
-        var result = await processor.ProcessAsync(request, cancellationToken);
-        await publishEndpoint.Publish(result.Event, cancellationToken);
+        var result = await processor.ProcessAsync(request, cancellationToken);        
 
         return Results.Created($"/payments/{result.Payment.Id}", result.Response);
     })

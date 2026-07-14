@@ -1,4 +1,4 @@
-using CloudGame.Contracts.Events;
+using CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
 using PaymentAPI.Dtos;
 using PaymentAPI.Models;
 

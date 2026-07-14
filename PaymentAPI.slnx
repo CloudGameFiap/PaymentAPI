@@ -1,14 +1,12 @@
 <Solution>
-  <Project Path="src\PaymentAPI.csproj" />
 	<Folder Name="/k8s/">
 		<File Path="k8s/configmap.yaml" />
 		<File Path="k8s/deployment.yaml" />
-		<File Path="k8s/rabbitmq.yaml" />
 		<File Path="k8s/secret.yaml" />
 		<File Path="k8s/service.yaml" />
-		<File Path="k8s/sqlserver.yaml" />
 	</Folder>
 	<Project Path="docker-compose.dcproj">
 		<Build />
 	</Project>
+	<Project Path="src\PaymentAPI.csproj" />
 </Solution>

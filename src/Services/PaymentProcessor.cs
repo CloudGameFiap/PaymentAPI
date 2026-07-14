@@ -1,14 +1,16 @@
-using CloudGame.Contracts.Events;
-using Microsoft.EntityFrameworkCore;
+using CloudGameCatalog.Consumer.Consumers.PaymentApi.PaymentProcessed;
+using MassTransit;
 using Microsoft.Extensions.Options;
 using PaymentAPI.Data;
 using PaymentAPI.Dtos;
 using PaymentAPI.Models;
 using PaymentAPI.Options;
+using static MassTransit.ValidationResultExtensions;
 
 namespace PaymentAPI.Services;
 
 public sealed class PaymentProcessor(
+    IPublishEndpoint publishEndpoint,
     PaymentDbContext dbContext,
     IOptions<PaymentProcessingOptions> options)
 {
@@ -18,7 +20,7 @@ public sealed class PaymentProcessor(
         ProcessPaymentRequest request,
         CancellationToken cancellationToken)
     {
-        var orderId = request.OrderId ?? Guid.NewGuid();
+        var orderId = Guid.NewGuid();
         //var existingPayment = await dbContext.Payments
         //    .AsNoTracking()
         //    .FirstOrDefaultAsync(payment => payment.OrderId == orderId, cancellationToken);
@@ -44,7 +46,11 @@ public sealed class PaymentProcessor(
         //dbContext.Payments.Add(payment);
         //await dbContext.SaveChangesAsync(cancellationToken);
 
-        return BuildResult(payment);
+        var result = BuildResult(payment);
+
+        await publishEndpoint.Publish(result.Event, cancellationToken);
+
+        return result;
     }
 
     private static PaymentProcessResult BuildResult(Payment payment)
@@ -53,14 +59,10 @@ public sealed class PaymentProcessor(
             payment,
             PaymentResponse.FromPayment(payment),
             new PaymentProcessedEvent
-            {
-                PaymentId = payment.Id,
-                OrderId = payment.OrderId,
+            {                
                 UserId = payment.UserId,
-                GameId = payment.GameId,
-                Price = payment.Price,
-                Status = payment.Status.ToString(),
-                ProcessedAt = payment.PaymentDate
+                GameId = payment.GameId,                
+                Status = payment.Status == PaymentStatus.Approved ? PaymentProcessStatus.PaymentApproved : PaymentProcessStatus.PaymentRejected,                
             });
     }
 }
