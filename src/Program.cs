@@ -60,7 +60,10 @@ try
                 h.Password(password);
             });
 
-            cfg.ConfigureEndpoints(context);            
+            cfg.ReceiveEndpoint("CloudGameCatalog.Domain.Commom.Events:OrderPlacedEvent", e =>
+            {
+                e.Consumer<OrderPlacedConsumer>(context);
+            });
         });
     });
 
